@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/MitchWAldrich/tinyapp/issues"
   },
-  "homepage": "https://github.com/MitchWAldrich/tinyapp#readme"
+  "homepage": "https://github.com/MitchWAldrich/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
