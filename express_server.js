@@ -6,13 +6,13 @@ app.use(bodyParser.urlencoded({extended:true}));
 
 app.set('view engine', 'ejs');
 
-const generateRandomString = function() {
+const generateRandomString = function(numOfChars) {
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let randomShortURL = ' ';
-  for (const char of characters) {
-    randomShortURL += characters.charAt(Math.floor(Math.random() * 6));
+  const charactersLength = characters.length;
+  for (let i = 0; i < numOfChars; i++) {
+    randomShortURL += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-  console.log(randomShortURL)
   return randomShortURL;
 };
 
