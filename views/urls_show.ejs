@@ -12,10 +12,8 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <% urlDatabase.forEach(function(urlDatabase) { %>
-        <h5 class="card-title">TinyURL for: <%= urlDatabase.longURL %></h5>
-        <p class="card-text">Short URL: <a href="/u/<%= urlDatabase.shortURL %>"><%= urlDatabase.shortURL %></a></p>
-        <% }); %>
+        <h5 class="card-title">TinyURL for: <%= templateVars.longURL %></h5>
+        <p class="card-text">Short URL: <a href="#"><%= templateVars.shortURL %></a></p>
       </div>
     <div class="card-footer text-muted"></div>
   </div>

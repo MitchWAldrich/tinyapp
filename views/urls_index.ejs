@@ -22,12 +22,12 @@
         </tr>
       </thead>
       <tbody>
-        <% urlDatabase.forEach(function(urlDatabase) { %>
+        <% for (let url in templateVars.urls) { %>
           <tr>
-            <td><%= urlDatabase.shortURL %></td>
-            <td><%= urlDatabase.longURL %></td>
+            <td><%= url %></td>
+            <td><%= templateVars.urls[url] %></td>
           </tr>
-        <% }); %>
+        <% }; %>
     </table>
     <div>
       <p href='#'><%= shorteningLink %></p>

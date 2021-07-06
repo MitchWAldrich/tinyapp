@@ -16,10 +16,10 @@ const generateRandomString = function(numOfChars) {
   return randomShortURL;
 };
 
-const urlDatabase = [
-  { shortURL: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca' },
-  { shortURL: '9sm5xK', longURL: 'http://www.google.com' }
-];
+const urlDatabase = {
+  'b2xVn2': 'http://www.lighthouselabs.ca',
+  '9sm5xK': 'http://www.google.com'
+};
 
 app.get('/', (req, res) => {
   res.send('Hello!');
@@ -35,9 +35,10 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const shorteningLink = 'Follow this link to shorten your URL:'
-  res.render('urls_index', {
-    urlDatabase: urlDatabase,
-    shorteningLink: shorteningLink
+  const templateVars = { urls: urlDatabase };
+  res.render('urls_index', { 
+    templateVars,
+    shorteningLink
   });
 });
 
@@ -45,17 +46,17 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new');
 });
 
-app.post("/urls", (req, res) => {
+app.post('/urls', (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
+  urlDatabase[randomShortURL] = { shortURL: req.body.shortURL, longURL: req.body.longURL }
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect('/urls')
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  const templateVars = { shortURL: urlDatabase.shortURL, longURL: urlDatabase.longURL };
-   res.render('urls_show', { 
-     templateVars: templateVars,
-     urlDatabase: urlDatabase
-   });
+  const id = req.params.shortURL;
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[id] };
+  res.render('urls_show', { templateVars: templateVars });
 });
 
 
@@ -65,7 +66,13 @@ app.listen(PORT, () => {
 
 
 // req.params: [
-//   { shortURL: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca' },
-//   { shortURL: '9sm5xK', longURL: 'http://www.google.com' }
-// ];
-// res.send(req.params);
+  //   { shortURL: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca' },
+  //   { shortURL: '9sm5xK', longURL: 'http://www.google.com' }
+  // ];
+  // res.send(req.params);
+  
+  // let shortURL = function() {
+  //   for (let key in urlDatabase) {
+  //     return key;
+  //   }
+  // }
