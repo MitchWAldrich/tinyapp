@@ -8,7 +8,7 @@ app.set('view engine', 'ejs');
 
 const generateRandomString = function(numOfChars) {
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let randomShortURL = ' ';
+  let randomShortURL = '';
   const charactersLength = characters.length;
   for (let i = 0; i < numOfChars; i++) {
     randomShortURL += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -59,15 +59,20 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('urls_show', { templateVars: templateVars });
 });
 
-app.use(function (req,res){
+app.post('/urls/:id/delete', (req, res,) => {
+  const id = req.params.id;
+  delete urlDatabase[id];
+  res.redirect(`/urls/`);
+});
+
+app.use(function (req, res){
 	res.status(404).render('urls_error');
 });
 
 app.get('/u/:shortURL', (req, res) => {
   const id = req.params.shortURL;
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[id] };
-  const longURL = templateVars.longURL;
-  res.redirect(longURL);
+  res.redirect(templateVars.longURL);
 });
 
 
