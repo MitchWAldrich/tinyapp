@@ -5,8 +5,8 @@ const PORT = 8080; // default port 8080
 app.set('view engine', 'ejs');
 
 const urlDatabase = [
-  { shortened: 'b2xVn2', original: 'http://www.lighthouselabs.ca' },
-  { shortened: '9sm5xK', original: 'http://www.google.com' }
+  { shortURL: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca' },
+  { shortURL: '9sm5xK', longURL: 'http://www.google.com' }
 ];
 
 app.get('/', (req, res) => {
@@ -22,7 +22,6 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
   const shorteningLink = 'Follow this link to shorten your URL:'
   res.render('urls_index', {
     urlDatabase: urlDatabase,
@@ -30,6 +29,21 @@ app.get('/urls', (req, res) => {
   });
 });
 
+app.get('/urls/:shortURL', (req, res) => {
+  const templateVars = { shortURL: urlDatabase.shortURL, longURL: urlDatabase.longURL };
+   res.render('urls_show', { 
+     templateVars: templateVars,
+     urlDatabase: urlDatabase
+   });
+})
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
+// req.params: [
+//   { shortURL: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca' },
+//   { shortURL: '9sm5xK', longURL: 'http://www.google.com' }
+// ];
+// res.send(req.params);
