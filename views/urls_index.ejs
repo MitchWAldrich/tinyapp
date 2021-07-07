@@ -19,22 +19,22 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
-        <% for (let url in templateVars.urls) { %>
+        <% for (let url in urlDatabase) { %>
           <tr>
-            <td><%= url %></td>
-            <td><%= templateVars.urls[url] %></td>
+            <td><%= urlDatabase[url].shortURL %></td>
+            <td><%= urlDatabase[url].longURL %></td>
+            <td><form method="POST" action="/urls/<%= url %>">
+              <button type="submit" style="color:blue; border-radius:5px; border-color:blue; background-color:white; padding:5px;" value="edit">Edit</button></form></td>
             <td><form method="POST" action="/urls/<%= url %>/delete">
             <button type="submit" style="color:red; border-radius:5px; border-color:red; background-color:white; padding:5px;" value="delete">Delete</button></form></td>
           </tr>
         <% }; %>
     </table>
-    <div>
-      <p href='#'><%= shorteningLink %></p>
-    </div>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
