@@ -44,15 +44,15 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.post('/urls', (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  console.log(req.params);  // Log the POST request body to the console
   let shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = {shortURL: shortURL, longURL: req.body.longURL};
   res.redirect(`/urls/${shortURL}`);
 });
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  const templateVars = { urlDatabase: urlDatabase, id };
+  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL};
   res.render('urls_show', templateVars);
 });
 
@@ -62,11 +62,10 @@ app.post('/urls/:id/delete', (req, res,) => {
   res.redirect(`/urls/`);
 });
 
-app.post('/urls/:id/edit', (req, res,) => {
-  const shortURL = req.params.id;
-  const templateVars = { shortURL: req.params.id, longURL: urlDatabase[shortURL] };
-  urlDatabase[shortURL] = {shortURL: shortURL, longURL: urlDatabase[shortURL]};
-  res.redirect(`/urls/${shortURL}`);
+app.post('/urls/:id', (req, res,) => {
+  const id = req.params.id;
+  urlDatabase[id] = {shortURL: id, longURL: req.body.longURL};
+  res.redirect(`/urls/${id}`);
 });
 
 app.use(function (req, res){
