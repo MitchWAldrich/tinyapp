@@ -22,6 +22,10 @@ const urlDatabase = {
   '9sm5xK': {shortURL: '9sm5xK', longURL: 'http://www.google.com'}
 };
 
+const userDatabase = [
+  { id: 1, name: 'Mitch'}
+]
+
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -36,7 +40,7 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
-  const templateVars = { urlDatabase: urlDatabase };
+  const templateVars = { urlDatabase: urlDatabase, userDatabase, username: req.cookies['username'] };
   res.render('urls_index', templateVars);
 });
 
@@ -46,8 +50,14 @@ app.post('/login', (req, res) => {
   res.redirect('/urls');
 })
 
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
+
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { username: req.cookies['username'] };
+  res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
@@ -59,7 +69,7 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL};
+  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, userDatabase, username: req.cookies['username']};
   res.render('urls_show', templateVars);
 });
 
