@@ -12,14 +12,13 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title">TinyURL for: <%= templateVars.longURL %></h5>
-        <p class="card-text">Short URL: <a href=" <%= templateVars.longURL %> "><%= templateVars.shortURL %></a></p>
+        <h5 class="card-title">TinyURL for: <%= id.longURL %></h5>
+        <p class="card-text">Short URL: <a href=" <%= id.longURL %> "><%= id.shortURL %></a></p>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
-  <div class="card text-center">
-    <div class="card-body"></div>
-    <h5 class="card-title">EDIT:</h5>
+  <div class="card text-center" style="background-color:lightgrey">
+    <h3 class="card-header">EDIT:</h3>
     <form class="form-inline" action="/urls" method="POST">
       <div class="form-group mb-2" style="margin:auto">
         <label for="longURL">New URL:</label>

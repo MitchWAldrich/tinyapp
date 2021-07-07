@@ -17,8 +17,8 @@ const generateRandomString = function(numOfChars) {
 };
 
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca',
-  '9sm5xK': 'http://www.google.com'
+  'b2xVn2': {shortURL: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca'},
+  '9sm5xK': {shortURL: '9sm5xK', longURL: 'http://www.google.com'}
 };
 
 app.get('/', (req, res) => {
@@ -34,12 +34,9 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const shorteningLink = 'Follow this link to shorten your URL:'
-  const templateVars = { urls: urlDatabase };
-  res.render('urls_index', { 
-    templateVars,
-    shorteningLink
-  });
+  // const shorteningLink = 'Follow this link to shorten your URL:'
+  const templateVars = { urlDatabase: urlDatabase };
+  res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
@@ -53,16 +50,23 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.get('/urls/:shortURL', (req, res) => {
-  const id = req.params.shortURL;
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[id] };
-  res.render('urls_show', { templateVars: templateVars });
+app.get('/urls/:id', (req, res) => {
+  const id = req.params.id;
+  const templateVars = { urlDatabase: urlDatabase, id };
+  res.render('urls_show', templateVars);
 });
 
 app.post('/urls/:id/delete', (req, res,) => {
   const id = req.params.id;
   delete urlDatabase[id];
   res.redirect(`/urls/`);
+});
+
+app.post('/urls/:id/edit', (req, res,) => {
+  const shortURL = req.params.id;
+  const templateVars = { shortURL: req.params.id, longURL: urlDatabase[shortURL] };
+  urlDatabase[shortURL] = {shortURL: shortURL, longURL: urlDatabase[shortURL]};
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.use(function (req, res){
