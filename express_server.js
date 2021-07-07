@@ -22,9 +22,18 @@ const urlDatabase = {
   '9sm5xK': {shortURL: '9sm5xK', longURL: 'http://www.google.com'}
 };
 
-const userDatabase = [
-  { id: 1, name: 'Mitch'}
-]
+const userDatausersbase = {
+  'userRandomID': { 
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'example-password'
+  },
+  'user2RandomID': { 
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'example2-password2'
+  },
+}
 
 app.get('/', (req, res) => {
   res.send('Hello!');
