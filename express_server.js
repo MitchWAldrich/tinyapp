@@ -22,7 +22,7 @@ const urlDatabase = {
   '9sm5xK': {shortURL: '9sm5xK', longURL: 'http://www.google.com'}
 };
 
-const userDatausersbase = {
+const users = {
   'userRandomID': { 
     id: 'userRandomID',
     email: 'user@example.com',
@@ -49,7 +49,7 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
-  const templateVars = { urlDatabase: urlDatabase, userDatabase, username: req.cookies['username'] };
+  const templateVars = { urlDatabase: urlDatabase, users, username: req.cookies['username'] };
   res.render('urls_index', templateVars);
 });
 
@@ -57,17 +57,25 @@ app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
   res.redirect('/urls');
-})
+});
 
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
-})
+});
 
 app.get('/register', (req, res) => {
   const templateVars = { username: req.cookies['username'] };
   res.render('registration', templateVars)
-})
+});
+
+app.post('/register', (req, res) => {
+  let randomUserID = generateRandomString(8);
+  users[randomUserID] = { id: randomUserID, email: req.body.email, password: req.body.password };
+  res.cookie('user_id', randomUserID);
+  console.log(`users: ${JSON.stringify(users)}`)
+  res.redirect('/urls');
+});
 
 app.get('/urls/new', (req, res) => {
   const templateVars = { username: req.cookies['username'] };
@@ -83,7 +91,7 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, userDatabase, username: req.cookies['username']};
+  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, users, username: req.cookies['username']};
   res.render('urls_show', templateVars);
 });
 
