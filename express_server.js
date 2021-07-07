@@ -40,11 +40,7 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
-<<<<<<< HEAD
-  const templateVars = { urlDatabase: urlDatabase };
-=======
   const templateVars = { urlDatabase: urlDatabase, userDatabase, username: req.cookies['username'] };
->>>>>>> feature/cookies
   res.render('urls_index', templateVars);
 });
 
@@ -57,6 +53,11 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
+})
+
+app.get('/register', (req, res) => {
+  const templateVars = { username: req.cookies['username'] };
+  res.render('registration', templateVars)
 })
 
 app.get('/urls/new', (req, res) => {
@@ -73,10 +74,6 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-<<<<<<< HEAD
-  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL};
-  res.render('urls_show', templateVars);
-=======
   const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, userDatabase, username: req.cookies['username']};
   res.render('urls_show', templateVars);
 });
@@ -85,7 +82,6 @@ app.post('/urls/:id', (req, res,) => {
   const id = req.params.id;
   urlDatabase[id] = {shortURL: id, longURL: req.body.longURL};
   res.redirect(`/urls/${id}`);
->>>>>>> feature/cookies
 });
 
 app.post('/urls/:id/delete', (req, res,) => {
