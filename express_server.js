@@ -2,8 +2,9 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 app.use(bodyParser.urlencoded({extended:true}));
-
+app.use(cookieParser());
 app.set('view engine', 'ejs');
 
 const generateRandomString = function(numOfChars) {
@@ -21,6 +22,10 @@ const urlDatabase = {
   '9sm5xK': {shortURL: '9sm5xK', longURL: 'http://www.google.com'}
 };
 
+const userDatabase = [
+  { id: 1, name: 'Mitch'}
+]
+
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -35,12 +40,28 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
+<<<<<<< HEAD
   const templateVars = { urlDatabase: urlDatabase };
+=======
+  const templateVars = { urlDatabase: urlDatabase, userDatabase, username: req.cookies['username'] };
+>>>>>>> feature/cookies
   res.render('urls_index', templateVars);
 });
 
+app.post('/login', (req, res) => {
+  const username = req.body.username;
+  res.cookie('username', username);
+  res.redirect('/urls');
+})
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
+
 app.get('/urls/new', (req, res) => {
-  res.render('urls_new');
+  const templateVars = { username: req.cookies['username'] };
+  res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
@@ -52,8 +73,19 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
+<<<<<<< HEAD
   const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL};
   res.render('urls_show', templateVars);
+=======
+  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, userDatabase, username: req.cookies['username']};
+  res.render('urls_show', templateVars);
+});
+
+app.post('/urls/:id', (req, res,) => {
+  const id = req.params.id;
+  urlDatabase[id] = {shortURL: id, longURL: req.body.longURL};
+  res.redirect(`/urls/${id}`);
+>>>>>>> feature/cookies
 });
 
 app.post('/urls/:id/delete', (req, res,) => {
