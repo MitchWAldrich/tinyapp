@@ -49,7 +49,7 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
-  const templateVars = { urlDatabase: urlDatabase, users, username: req.cookies['username'] };
+  const templateVars = { urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
   res.render('urls_index', templateVars);
 });
 
@@ -65,7 +65,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  const templateVars = { user_id: req.cookies['user_id'] };
   res.render('registration', templateVars)
 });
 
@@ -78,7 +78,8 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const templateVars = { username: req.cookies['username'] };
+  console.log(req.cookies);
+  const templateVars = { user: users[req.cookies['user_id']], };
   res.render('urls_new', templateVars);
 });
 
@@ -91,7 +92,7 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, users, username: req.cookies['username']};
+  const templateVars = { shortURL: id, longURL: urlDatabase[id].longURL, users, user: users[req.cookies['user_id']]};
   res.render('urls_show', templateVars);
 });
 
