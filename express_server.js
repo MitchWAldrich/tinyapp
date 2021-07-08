@@ -155,12 +155,21 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  if (!req.cookies.user_id) {
+    res.redirect('/login');
+    return;
+  }
   console.log(req.cookies);
   const templateVars = { user: users[req.cookies['user_id']], };
   res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
+  if (!req.cookies.user_id) {
+    errorHandler(res, 403, 'Access forbidden. You are not logged in.', userLookUp(email));
+    res.redirect('/urls_error');
+    return;
+  }
   console.log(req.params);  // Log the POST request body to the console
   let shortURL = generateRandomString(6);
   urlDatabase[shortURL] = {shortURL: shortURL, longURL: req.body.longURL};
