@@ -196,13 +196,12 @@ app.post('/urls/:id/delete', (req, res,) => {
   res.redirect(`/urls/`);
 });
 
-app.use(function (req, res){
-  const templateVars = { user: users[req.cookies['user_id']], };
-	res.status(404).render('urls_error', templateVars);
-});
-
 app.get('/u/:shortURL', (req, res) => {
   const id = req.params.userID;
+  if (!id) {
+    errorHandler(res, 404, 'The website does not exist', undefined);
+    return
+  }
   const templateVars = { userID: req.params.userID, longURL: urlDatabase[id] };
   res.redirect(templateVars.longURL);
   console.log(templateVars.longURL)
