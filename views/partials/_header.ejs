@@ -18,15 +18,14 @@
       <button type="submit" style="color:green; display:inline-block; vertical-align:middle; border-radius:5px; border-color:white; background-color:white; padding:5px;"
       value="submit">Logout</button>
     </form>
-    <% } else { %>
-      <form method="POST" action="/login">
-        <p class="navbar-brand" style="color:white;"></p>
-        <input class="form-control" type="text" name="username" placeholder="username"
-                style="width: 200px; margin: 1em; display:inline-block; vertical-align:middle;">
-        <button type="submit"
-          style="color:green; display:inline-block; vertical-align:middle; border-radius:5px; border-color:white; background-color:white; padding:5px;"
-          value="submit">Login</button>
-          <% } %>
+      <% } else { %>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/register">Register</a>
+        </div>
+      </div>        
+        <% } %>
       </form>
     </div>
   </nav>

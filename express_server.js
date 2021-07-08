@@ -45,6 +45,14 @@ const emailLookUp = function(email) {
   }  
 }
 
+const userLookUp = function(email) {
+  for (const user in users) {
+    if (email === users[user].email) {
+      return user;
+    }
+  }
+}
+
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -69,8 +77,12 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const email = req.body.email;
+  const user_id = userLookUp(email);
+  console.log('email', email)
+  console.log('user', user_id)
+  // const username = req.body.username;
+  res.cookie('user_id', user_id);
   res.redirect('/urls');
 });
 
