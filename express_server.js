@@ -3,6 +3,8 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { errorHandler, noInputError } = require('./helpers');
+
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
@@ -35,6 +37,14 @@ const users = {
   },
 }
 
+const emailLookUp = function(email) {
+  for (const user in users) {
+    if (email === users[user].email) {
+      return users[user];
+    }  
+  }  
+}
+
 app.get('/', (req, res) => {
   res.send('Hello!');
 });
@@ -60,21 +70,35 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
 app.get('/register', (req, res) => {
-  const templateVars = { user_id: req.cookies['user_id'] };
+  const templateVars = { user: users[req.cookies['user_id']] };
   res.render('registration', templateVars)
 });
 
 app.post('/register', (req, res) => {
   let randomUserID = generateRandomString(8);
+  let email = req.body.email;
+  let password = req.body.password;
+  if (email === "" || password === "") {
+    // res.status(400).send('no e-mail or password entered')
+    errorHandler(res, 400, 'no e-mail or password entered', undefined);
+    return
+    // console.log(`users: ${JSON.stringify(users)}`)
+  }
+  if (emailLookUp(email)) {
+    // res.status(400).send('E-mail already exists in database')
+    errorHandler(res, 400, 'E-mail already exists in database', undefined);
+    return
+  } else {
   users[randomUserID] = { id: randomUserID, email: req.body.email, password: req.body.password };
+  // console.log(JSON.stringify(users))
   res.cookie('user_id', randomUserID);
-  console.log(`users: ${JSON.stringify(users)}`)
   res.redirect('/urls');
+  }
 });
 
 app.get('/urls/new', (req, res) => {
@@ -115,13 +139,15 @@ app.post('/urls/:id', (req, res,) => {
 });
 
 app.use(function (req, res){
-	res.status(404).render('urls_error');
+  const templateVars = { user: users[req.cookies['user_id']], };
+	res.status(404).render('urls_error', templateVars);
 });
 
 app.get('/u/:shortURL', (req, res) => {
   const id = req.params.shortURL;
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[id] };
   res.redirect(templateVars.longURL);
+  console.log(templateVars.longURL)
 });
 
 
