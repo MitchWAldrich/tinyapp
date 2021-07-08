@@ -109,6 +109,8 @@ app.get('/urls', (req, res) => {
     return;
   }
   const userURLs = urlsForUser(req.cookies.user_id);
+  console.log('userURLS', userURLs)
+  
   const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
   res.render('urls_index', templateVars)
 });
@@ -195,9 +197,12 @@ app.post('/urls', (req, res) => {
     res.redirect('/urls_error');
     return;
   }
-  console.log(req.params);  // Log the POST request body to the console
+  // console.log(req.params);  // Log the POST request body to the console
   let shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = {userID: shortURL, longURL: req.body.longURL};
+  urlDatabase[shortURL] = {userID: req.cookies.user_id, longURL: req.body.longURL};
+  console.log('test', urlDatabase[shortURL])
+  console.log('test2', req.body.longURL)
+  console.log('database', urlDatabase)
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -210,26 +215,50 @@ app.get('/urls/:id', (req, res) => {
   }
   const userURLs = urlsForUser(req.cookies.user_id);
   const userKeys = Object.keys(userURLs);
-  if (!userKeys.includes(id)) {
+  if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.cookies.user_id);
     return;
   }
+  if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
+    errorHandler(res, 403, 'You do not have permission to access this URL.', req.cookies.user_id);
+    return;
+  }
+  // console.log('userKeys', userKeys)
+  // console.log('userURLs', userURLs)
+  // console.log('id', id)
   const templateVars = { userID: id, longURL: longURL, users, user: users[req.cookies['user_id']]};
   res.render('urls_show', templateVars);
 });
 
-app.post('/urls/:id', (req, res,) => {
+app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
-  // console.log('id', id)
-  // console.log('body', req.body)
   const longURL = req.body.longURL;
-  // console.log('longURL', urlDatabase[id].longURL)
-  urlDatabase[id] = { userID: id, longURL: longURL };
+  const userURLs = urlsForUser(req.cookies.user_id);
+  const userKeys = Object.keys(userURLs);
+  if (userKeys.length === 0) {
+    errorHandler(res, 403, 'You do not have permission to edit this URL.', req.cookies.user_id);
+    return;
+  }
+  if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
+    errorHandler(res, 403, 'You do not have permission to edit this URL.', req.cookies.user_id);
+    return;
+  }
+  urlDatabase[id] = { userID: req.cookies.user_id, longURL: longURL };
   res.redirect(`/urls/${id}`);
 });
 
-app.post('/urls/:id/delete', (req, res,) => {
+app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
+  const userURLs = urlsForUser(req.cookies.user_id);
+  const userKeys = Object.keys(userURLs);
+  if (userKeys.length === 0) {
+    errorHandler(res, 403, 'You do not have permission to delete this URL.', req.cookies.user_id);
+    return;
+  }
+  if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
+    errorHandler(res, 403, 'You do not have permission to delete this URL.', req.cookies.user_id);
+    return;
+  }
   delete urlDatabase[id];
   res.redirect(`/urls/`);
 });
