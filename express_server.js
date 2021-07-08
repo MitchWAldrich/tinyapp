@@ -20,8 +20,8 @@ const generateRandomString = function(numOfChars) {
 };
 
 const urlDatabase = {
-  'b2xVn2': {userID: 'b2xVn2', longURL: 'http://www.lighthouselabs.ca'},
-  '9sm5xK': {userID: '9sm5xK', longURL: 'http://www.google.com'}
+  'b2xVn2': {userID: 'userRandomID', longURL: 'http://www.lighthouselabs.ca'},
+  '9sm5xK': {userID: 'userRandomID', longURL: 'http://www.google.com'}
 };
 
 const users = {
@@ -55,7 +55,7 @@ const userLookUp = function(email) {
 
 const passwordLookUp = function(email) {
   for (const user in users) {
-    if (email == users[user].email) {
+    if (email === users[user].email) {
       return users[user].password;
     }
   }
@@ -63,10 +63,30 @@ const passwordLookUp = function(email) {
 
 const emailLookUp = function(email) {
   for (const user in users) {
-    if (email == users[user].email) {
+    if (email === users[user].email) {
       return email;
     }
   }
+}
+
+// const checkUserExists = function(user_id) {
+//   for (const user in users) {
+//     if (user === user_id) {
+//       return true;
+//     }
+//   }
+// }
+
+const urlsForUser = function(id) {
+  let usersURLS = {};
+  for (const url in urlDatabase) {
+    // console.log(url);
+    if (urlDatabase[url].userID === id) {
+      usersURLS[url] = urlDatabase[url].longURL;
+    }
+  }
+  // console.log(usersURLS)
+  return usersURLS;
 }
 
 app.get('/', (req, res) => {
@@ -84,8 +104,13 @@ app.get('/urls.json', (req, res) => {
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
   // console.log('cookie:', req.cookies.user_id)
-  const templateVars = { urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
-  res.render('urls_index', templateVars);
+  if (!req.cookies.user_id) {
+    errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
+    return;
+  }
+  const userURLs = urlsForUser(req.cookies.user_id);
+  const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
+  res.render('urls_index', templateVars)
 });
 
 app.get('/login', (req, res) => {
@@ -179,14 +204,27 @@ app.post('/urls', (req, res) => {
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
-  console.log('body', res.body)
+  if (!req.cookies.user_id) {
+    errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
+    return;
+  }
+  const userURLs = urlsForUser(req.cookies.user_id);
+  const userKeys = Object.keys(userURLs);
+  if (!userKeys.includes(id)) {
+    errorHandler(res, 403, 'You do not have permission to access this URL.', req.cookies.user_id);
+    return;
+  }
   const templateVars = { userID: id, longURL: longURL, users, user: users[req.cookies['user_id']]};
   res.render('urls_show', templateVars);
 });
 
 app.post('/urls/:id', (req, res,) => {
   const id = req.params.id;
-  urlDatabase[id] = {userID: id, longURL: req.body.longURL};
+  // console.log('id', id)
+  // console.log('body', req.body)
+  const longURL = req.body.longURL;
+  // console.log('longURL', urlDatabase[id].longURL)
+  urlDatabase[id] = { userID: id, longURL: longURL };
   res.redirect(`/urls/${id}`);
 });
 
