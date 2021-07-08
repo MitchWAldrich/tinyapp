@@ -63,6 +63,11 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get('/login', (req, res) => {
+  const templateVars = { urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
+  res.render('login', templateVars)
+});
+
 app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
