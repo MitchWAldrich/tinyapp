@@ -26,7 +26,7 @@
       <tbody>
         <% for (let url in urlDatabase) { %>
           <tr>
-            <td><%= urlDatabase[url].shortURL %></td>
+            <td><%= urlDatabase[url].userID %></td>
             <td><%= urlDatabase[url].longURL %></td>
             <td><form method="POST" action="/urls/<%= url %>">
               <button type="submit" style="color:blue; border-radius:5px; border-color:blue; background-color:white; padding:5px;" value="edit">Edit</button></form></td>
