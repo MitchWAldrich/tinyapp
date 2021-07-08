@@ -83,11 +83,16 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
+  // console.log('cookie:', req.cookies.user_id)
   const templateVars = { urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
   res.render('urls_index', templateVars);
 });
 
 app.get('/login', (req, res) => {
+  if (req.cookies.user_id) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVars = { urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
   res.render('login', templateVars)
 });
@@ -119,6 +124,10 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+  if (req.cookies.user_id) {
+    res.redirect('/urls');
+    return;
+  }
   const templateVars = { user: users[req.cookies['user_id']] };
   res.render('registration', templateVars)
 });
