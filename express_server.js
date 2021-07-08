@@ -37,7 +37,7 @@ const users = {
   },
 }
 
-const emailLookUp = function(email) {
+const userObjectLookUp = function(email) {
   for (const user in users) {
     if (email === users[user].email) {
       return users[user];
@@ -49,6 +49,22 @@ const userLookUp = function(email) {
   for (const user in users) {
     if (email === users[user].email) {
       return user;
+    }
+  }
+}
+
+const passwordLookUp = function(email) {
+  for (const user in users) {
+    if (email == users[user].email) {
+      return users[user].password;
+    }
+  }
+}
+
+const emailLookUp = function(email) {
+  for (const user in users) {
+    if (email == users[user].email) {
+      return email;
     }
   }
 }
@@ -78,9 +94,20 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
+  const password = req.body.password;
   const user_id = userLookUp(email);
-  console.log('email', email)
-  console.log('user', user_id)
+  // console.log('email', email)
+  // console.log('password', password)
+  if (!emailLookUp(email)) {
+    errorHandler(res, 403, 'User not found', userLookUp(email));
+    return
+  }
+  if (passwordLookUp(email) !== password) {
+    // console.log('email', emailLookUp(email))
+    // console.log('password', passwordLookUp(email))
+    errorHandler(res, 403, 'Incorrect password', userLookUp(email));
+    return
+  }
   // const username = req.body.username;
   res.cookie('user_id', user_id);
   res.redirect('/urls');
@@ -106,7 +133,7 @@ app.post('/register', (req, res) => {
     return
     // console.log(`users: ${JSON.stringify(users)}`)
   }
-  if (emailLookUp(email)) {
+  if (userObjectLookUp(email)) {
     // res.status(400).send('E-mail already exists in database')
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
     return
