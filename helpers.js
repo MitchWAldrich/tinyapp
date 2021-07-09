@@ -3,13 +3,23 @@ const errorHandler = function(res, errorCode, errorMessage, user) {
   res.render('urls_error', templateVars);
 }
 
-const noInputError = function(res) {
-  const templateVars = { errorCode: 400, errorMessage: 'no e-mail or password entered', user: undefined}
-  res.render('urls_error', templateVars);
+const getUserByEmail = function(email, users) {
+  for (const user in users) {
+    if (email === users[user].email) {
+      return user;
+    }
+  }
 }
+
+// const noInputError = function(res) {
+//   const templateVars = { errorCode: 400, errorMessage: 'no e-mail or password entered', user: undefined}
+//   res.render('urls_error', templateVars);
+// }
 
 
 
 module.exports = { 
   errorHandler,
-  noInputError };
+  getUserByEmail
+  // noInputError 
+};

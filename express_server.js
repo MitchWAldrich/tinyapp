@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 // const cookieParser = require('cookie-parser');
-const { errorHandler, noInputError } = require('./helpers');
+const { errorHandler, getUserByEmail } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 
@@ -56,13 +56,13 @@ const users = {
 //   }  
 // }
 
-const getUserByEmail = function(email, users) {
-  for (const user in users) {
-    if (email === users[user].email) {
-      return user;
-    }
-  }
-}
+// const getUserByEmail = function(email, users) {
+//   for (const user in users) {
+//     if (email === users[user].email) {
+//       return user;
+//     }
+//   }
+// }
 
 // const passwordLookUp = function(email) {
 //   for (const user in users) {
