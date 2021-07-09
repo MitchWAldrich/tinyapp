@@ -120,8 +120,7 @@ app.get('/urls.json', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  // const shorteningLink = 'Follow this link to shorten your URL:'
-  // console.log('cookie:', req.session.user_id)
+  const shorteningLink = 'Follow this link to shorten your URL:'
   if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
@@ -129,7 +128,7 @@ app.get('/urls', (req, res) => {
   const userURLs = urlsForUser(req.session.user_id);
   // console.log('users', users)
   
-  const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
+  const templateVars = { userURLs, shorteningLink, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
   res.render('urls_index', templateVars)
 });
 
@@ -232,6 +231,7 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
+  console.log(req.params.id)
   const longURL = urlDatabase[id].longURL;
   if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
@@ -247,9 +247,6 @@ app.get('/urls/:id', (req, res) => {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
     return;
   }
-  // console.log('userKeys', userKeys)
-  // console.log('userURLs', userURLs)
-  // console.log('id', id)
   const templateVars = { userID: id, longURL: longURL, users, user: users[req.session.user_id]};
   res.render('urls_show', templateVars);
 });
