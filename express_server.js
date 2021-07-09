@@ -101,7 +101,14 @@ const urlsForUser = function(id) {
 }
 
 app.get('/', (req, res) => {
-  res.send('Hello!');
+  if (!req.session.user_id) {
+    res.redirect('/login');
+    return;
+  }
+  if (req.session.user_id) {
+    res.redirect('/urls');
+    return;
+  }
 });
 
 app.get('/hello', (req, res) => {
