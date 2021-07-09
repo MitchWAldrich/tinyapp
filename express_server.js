@@ -193,12 +193,6 @@ app.post('/register', (req, res) => {
     return
   } else {
   users[randomUserID] = { id: randomUserID, email: req.body.email, password: hashedPassword };
-  // console.log('userInput', users[randomUserID])
-  // console.log('randomUserID', randomUserID)
-  // console.log('email', req.body.email)
-  // console.log('password', hashedPassword)
-  // console.log('database', users)
-  // console.log(JSON.stringify(users))
   req.session.user_id = randomUserID;
   res.redirect('/urls');
   }
@@ -231,12 +225,18 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  console.log(req.params.id)
-  const longURL = urlDatabase[id].longURL;
+  // console.log(req.params)
+  const shortURL = urlDatabase[id];
+  console.log('udb',urlDatabase[id])
+  if (!shortURL) {
+    errorHandler(res, 404, 'The website does not exist', req.session.user_id);
+    return
+  }
   if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
   }
+  const longURL = urlDatabase[id].longURL;
   const userURLs = urlsForUser(req.session.user_id);
   const userKeys = Object.keys(userURLs);
   if (userKeys.length === 0) {
