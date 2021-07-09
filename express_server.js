@@ -2,20 +2,18 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+// const cookieParser = require('cookie-parser');
 const { errorHandler, noInputError } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
-
 
 
 const salt = bcrypt.genSaltSync(10);
 bcrypt.hashSync("", salt);
 
 
-
 app.use(bodyParser.urlencoded({extended:true}));
-app.use(cookieParser());
+// app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.use(cookieSession({
   name: 'session',
@@ -116,24 +114,24 @@ app.get('/urls.json', (req, res) => {
 
 app.get('/urls', (req, res) => {
   // const shorteningLink = 'Follow this link to shorten your URL:'
-  // console.log('cookie:', req.cookies.user_id)
-  if (!req.cookies.user_id) {
+  // console.log('cookie:', req.session.user_id)
+  if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
   }
-  const userURLs = urlsForUser(req.cookies.user_id);
+  const userURLs = urlsForUser(req.session.user_id);
   // console.log('users', users)
   
-  const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
+  const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
   res.render('urls_index', templateVars)
 });
 
 app.get('/login', (req, res) => {
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     res.redirect('/urls');
     return;
   }
-  const templateVars = { urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
+  const templateVars = { urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
   res.render('login', templateVars)
 });
 
@@ -154,21 +152,21 @@ app.post('/login', (req, res) => {
   //   return
   // }
   // bcrypt.compareSync('password', hashedPassword);
-  res.cookie('user_id', user_id);
+  req.session.user_id = user_id;
   res.redirect('/urls');
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  delete req.session.user_id;
   res.redirect('/urls');
 });
 
 app.get('/register', (req, res) => {
-  if (req.cookies.user_id) {
+  if (req.session.user_id) {
     res.redirect('/urls');
     return;
   }
-  const templateVars = { user: users[req.cookies['user_id']] };
+  const templateVars = { user: users[req.session.user_id] };
   res.render('registration', templateVars)
 });
 
@@ -195,30 +193,30 @@ app.post('/register', (req, res) => {
   // console.log('password', hashedPassword)
   // console.log('database', users)
   // console.log(JSON.stringify(users))
-  res.cookie('user_id', randomUserID);
+  req.session.user_id = randomUserID;
   res.redirect('/urls');
   }
 });
 
 app.get('/urls/new', (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     res.redirect('/login');
     return;
   }
   console.log(req.cookies);
-  const templateVars = { user: users[req.cookies['user_id']], };
+  const templateVars = { user: users[req.session.user_id], };
   res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     errorHandler(res, 403, 'Access forbidden. You are not logged in.', undefined);
     res.redirect('/urls_error');
     return;
   }
   // console.log(req.params);  // Log the POST request body to the console
   let shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = {userID: req.cookies.user_id, longURL: req.body.longURL};
+  urlDatabase[shortURL] = {userID: req.session.user_id, longURL: req.body.longURL};
   console.log('test', urlDatabase[shortURL])
   console.log('test2', req.body.longURL)
   console.log('database', urlDatabase)
@@ -228,54 +226,54 @@ app.post('/urls', (req, res) => {
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
   const longURL = urlDatabase[id].longURL;
-  if (!req.cookies.user_id) {
+  if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
   }
-  const userURLs = urlsForUser(req.cookies.user_id);
+  const userURLs = urlsForUser(req.session.user_id);
   const userKeys = Object.keys(userURLs);
   if (userKeys.length === 0) {
-    errorHandler(res, 403, 'You do not have permission to access this URL.', req.cookies.user_id);
+    errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
     return;
   }
   if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
-    errorHandler(res, 403, 'You do not have permission to access this URL.', req.cookies.user_id);
+    errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
     return;
   }
   // console.log('userKeys', userKeys)
   // console.log('userURLs', userURLs)
   // console.log('id', id)
-  const templateVars = { userID: id, longURL: longURL, users, user: users[req.cookies['user_id']]};
+  const templateVars = { userID: id, longURL: longURL, users, user: users[req.session.user_id]};
   res.render('urls_show', templateVars);
 });
 
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
-  const userURLs = urlsForUser(req.cookies.user_id);
+  const userURLs = urlsForUser(req.session.user_id);
   const userKeys = Object.keys(userURLs);
   if (userKeys.length === 0) {
-    errorHandler(res, 403, 'You do not have permission to edit this URL.', req.cookies.user_id);
+    errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
     return;
   }
   if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
-    errorHandler(res, 403, 'You do not have permission to edit this URL.', req.cookies.user_id);
+    errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
     return;
   }
-  urlDatabase[id] = { userID: req.cookies.user_id, longURL: longURL };
+  urlDatabase[id] = { userID: req.session.user_id, longURL: longURL };
   res.redirect(`/urls/${id}`);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
-  const userURLs = urlsForUser(req.cookies.user_id);
+  const userURLs = urlsForUser(req.session.user_id);
   const userKeys = Object.keys(userURLs);
   if (userKeys.length === 0) {
-    errorHandler(res, 403, 'You do not have permission to delete this URL.', req.cookies.user_id);
+    errorHandler(res, 403, 'You do not have permission to delete this URL.', req.session.user_id);
     return;
   }
   if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
-    errorHandler(res, 403, 'You do not have permission to delete this URL.', req.cookies.user_id);
+    errorHandler(res, 403, 'You do not have permission to delete this URL.', req.session.user_id);
     return;
   }
   delete urlDatabase[id];
