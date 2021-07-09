@@ -4,10 +4,23 @@ const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { errorHandler, noInputError } = require('./helpers');
+const bcrypt = require('bcryptjs');
+const cookieSession = require('cookie-session');
+
+
+
+const salt = bcrypt.genSaltSync(10);
+bcrypt.hashSync("", salt);
+
+
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(cookieParser());
 app.set('view engine', 'ejs');
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
 
 const generateRandomString = function(numOfChars) {
   const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -28,12 +41,12 @@ const users = {
   'userRandomID': { 
     id: 'userRandomID',
     email: 'user@example.com',
-    password: 'example-password'
+    password: bcrypt.hashSync("example-password", salt)
   },
   'user2RandomID': { 
     id: 'user2RandomID',
     email: 'user2@example.com',
-    password: 'example2-password2'
+    password: bcrypt.hashSync("example2-password2", salt)
   },
 }
 
@@ -109,7 +122,7 @@ app.get('/urls', (req, res) => {
     return;
   }
   const userURLs = urlsForUser(req.cookies.user_id);
-  console.log('userURLS', userURLs)
+  // console.log('users', users)
   
   const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.cookies['user_id']] };
   res.render('urls_index', templateVars)
@@ -125,22 +138,22 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const user_id = userLookUp(email);
-  // console.log('email', email)
-  // console.log('password', password)
-  if (!emailLookUp(email)) {
-    errorHandler(res, 403, 'User not found', userLookUp(email));
+
+  const passwordMatch = bcrypt.compareSync(password, users[user_id].password);
+  if (!(users[user_id] && passwordMatch)) {
+    errorHandler(res, 403, 'Incorrect email or password', userLookUp(email));
     return
   }
-  if (passwordLookUp(email) !== password) {
-    // console.log('email', emailLookUp(email))
-    // console.log('password', passwordLookUp(email))
-    errorHandler(res, 403, 'Incorrect password', userLookUp(email));
-    return
-  }
-  // const username = req.body.username;
+  // if (!emailLookUp(email)) {
+  // }
+  // if (passwordLookUp(email) !== password) {
+  //   errorHandler(res, 403, 'Incorrect password', userLookUp(email));
+  //   return
+  // }
+  // bcrypt.compareSync('password', hashedPassword);
   res.cookie('user_id', user_id);
   res.redirect('/urls');
 });
@@ -161,8 +174,9 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   let randomUserID = generateRandomString(8);
-  let email = req.body.email;
-  let password = req.body.password;
+  const email = req.body.email;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   if (email === "" || password === "") {
     // res.status(400).send('no e-mail or password entered')
     errorHandler(res, 400, 'no e-mail or password entered', undefined);
@@ -174,7 +188,12 @@ app.post('/register', (req, res) => {
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
     return
   } else {
-  users[randomUserID] = { id: randomUserID, email: req.body.email, password: req.body.password };
+  users[randomUserID] = { id: randomUserID, email: req.body.email, password: hashedPassword };
+  // console.log('userInput', users[randomUserID])
+  // console.log('randomUserID', randomUserID)
+  // console.log('email', req.body.email)
+  // console.log('password', hashedPassword)
+  // console.log('database', users)
   // console.log(JSON.stringify(users))
   res.cookie('user_id', randomUserID);
   res.redirect('/urls');
