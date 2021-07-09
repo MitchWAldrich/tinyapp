@@ -48,15 +48,15 @@ const users = {
   },
 }
 
-const userObjectLookUp = function(email) {
-  for (const user in users) {
-    if (email === users[user].email) {
-      return users[user];
-    }  
-  }  
-}
+// const userObjectLookUp = function(email) {
+//   for (const user in users) {
+//     if (email === users[user].email) {
+//       return users[user];
+//     }  
+//   }  
+// }
 
-const userLookUp = function(email) {
+const getUserByEmail = function(email, users) {
   for (const user in users) {
     if (email === users[user].email) {
       return user;
@@ -64,21 +64,21 @@ const userLookUp = function(email) {
   }
 }
 
-const passwordLookUp = function(email) {
-  for (const user in users) {
-    if (email === users[user].email) {
-      return users[user].password;
-    }
-  }
-}
+// const passwordLookUp = function(email) {
+//   for (const user in users) {
+//     if (email === users[user].email) {
+//       return users[user].password;
+//     }
+//   }
+// }
 
-const emailLookUp = function(email) {
-  for (const user in users) {
-    if (email === users[user].email) {
-      return email;
-    }
-  }
-}
+// const emailLookUp = function(email) {
+//   for (const user in users) {
+//     if (email === users[user].email) {
+//       return email;
+//     }
+//   }
+// }
 
 // const checkUserExists = function(user_id) {
 //   for (const user in users) {
@@ -138,17 +138,17 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  const user_id = userLookUp(email);
+  const user_id = getUserByEmail(email, users);
 
   const passwordMatch = bcrypt.compareSync(password, users[user_id].password);
   if (!(users[user_id] && passwordMatch)) {
-    errorHandler(res, 403, 'Incorrect email or password', userLookUp(email));
+    errorHandler(res, 403, 'Incorrect email or password', getUserByEmail(email, users));
     return
   }
   // if (!emailLookUp(email)) {
   // }
   // if (passwordLookUp(email) !== password) {
-  //   errorHandler(res, 403, 'Incorrect password', userLookUp(email));
+  //   errorHandler(res, 403, 'Incorrect password', getUserByEmail(email, users));
   //   return
   // }
   // bcrypt.compareSync('password', hashedPassword);
@@ -181,7 +181,7 @@ app.post('/register', (req, res) => {
     return
     // console.log(`users: ${JSON.stringify(users)}`)
   }
-  if (userObjectLookUp(email)) {
+  if (getUserByEmail(email, users)) {
     // res.status(400).send('E-mail already exists in database')
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
     return
