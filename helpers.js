@@ -6,6 +6,7 @@ const errorHandler = function(res, errorCode, errorMessage, user) {
 const getUserByEmail = function(email, users) {
   for (const user in users) {
     if (email === users[user].email) {
+      // console.log(user)
       return user;
     }
   }
