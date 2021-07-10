@@ -6,7 +6,6 @@ const errorHandler = function(res, errorCode, errorMessage, user) {
 const getUserByEmail = function(email, users) {
   for (const user in users) {
     if (email === users[user].email) {
-      // console.log(user)
       return user;
     }
   }
@@ -15,12 +14,10 @@ const getUserByEmail = function(email, users) {
 const urlsForUser = function(id, database) {
   let usersURLS = {};
   for (const url in database) {
-    // console.log(url);
     if (database[url].userID === id) {
       usersURLS[url] = database[url].longURL;
     }
   }
-  // console.log(usersURLS)
   return usersURLS;
 }
 
