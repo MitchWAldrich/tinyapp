@@ -1,4 +1,5 @@
 const express = require('express');
+const methodOverride = require('method-override');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
@@ -6,10 +7,11 @@ const { errorHandler, getUserByEmail, urlsForUser, emailLookUp, generateRandomSt
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
-bcrypt.hashSync("", salt);
+bcrypt.hashSync('', salt);
 
-app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(methodOverride('_method'));
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -25,12 +27,12 @@ const users = {
   'userRandomID': {
     id: 'userRandomID',
     email: 'user@example.com',
-    password: bcrypt.hashSync("example-password", salt)
+    password: bcrypt.hashSync('example-password', salt)
   },
   'user2RandomID': {
     id: 'user2RandomID',
     email: 'user2@example.com',
-    password: bcrypt.hashSync("example2-password2", salt)
+    password: bcrypt.hashSync('example2-password2', salt)
   },
 };
 
@@ -100,7 +102,7 @@ app.post('/register', (req, res) => {
   const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if (email === "" || password === "") {
+  if (email === '' || password === '') {
     errorHandler(res, 400, 'no e-mail or password entered', undefined);
   } else if (getUserByEmail(email, users)) {
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
@@ -182,7 +184,7 @@ app.post('/urls/:id', (req, res) => {
   }
 });
 
-app.post('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id/delete', (req, res, next) => {
   const id = req.params.id;
   const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const userKeys = Object.keys(userURLs);
