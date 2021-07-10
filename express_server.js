@@ -59,7 +59,7 @@ app.get('/login', (req, res) => {
   if (req.session.user_id) {
     res.redirect('/urls');
   } else {
-    const templateVars = { urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
+    const templateVars = { urlDatabase, users, user: users[req.session.user_id] };
     res.render('login', templateVars);
   }
 });
@@ -118,7 +118,7 @@ app.get('/urls', (req, res) => {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
   } else {
     const userURLs = urlsForUser(req.session.user_id, urlDatabase);
-    const templateVars = { userURLs, urlDatabase: urlDatabase, users, user: users[req.  session.user_id] };
+    const templateVars = { userURLs, urlDatabase, users, user: users[req.  session.user_id] };
     res.render('urls_index', templateVars);
   }
 });
@@ -161,7 +161,7 @@ app.get('/urls/:id', (req, res) => {
   } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
   } else {
-    const templateVars = { userID: id, longURL: longURL, users, user: users[req.session.user_id]};
+    const templateVars = { userID: id, longURL, users, user: users[req.session.user_id]};
     res.render('urls_show', templateVars);
   }
 });
