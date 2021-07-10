@@ -3,13 +3,10 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
 const { errorHandler, getUserByEmail, urlsForUser, emailLookUp } = require('./helpers');
-const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
-
-
+const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
 bcrypt.hashSync("", salt);
-
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.set('view engine', 'ejs');
@@ -46,19 +43,6 @@ const users = {
   },
 }
 
-
-// const urlsForUser = function(id, database) {
-//   let usersURLS = {};
-//   for (const url in urlDatabase) {
-//     // console.log(url);
-//     if (urlDatabase[url].userID === id) {
-//       usersURLS[url] = urlDatabase[url].longURL;
-//     }
-//   }
-//   // console.log(usersURLS)
-//   return usersURLS;
-// }
-
 app.get('/', (req, res) => {
   if (!req.session.user_id) {
     res.redirect('/login');
@@ -78,43 +62,29 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get('/urls', (req, res) => {
-  const shorteningLink = 'Follow this link to shorten your URL:'
-  if (!req.session.user_id) {
-    errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
-    return;
-  }
-  const userURLs = urlsForUser(req.session.user_id, urlDatabase);
-  // console.log('users', users)
-  
-  const templateVars = { userURLs, shorteningLink, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
-  res.render('urls_index', templateVars)
-});
-
 app.get('/login', (req, res) => {
   if (req.session.user_id) {
     res.redirect('/urls');
-    return;
-  }
+  } else {
   const templateVars = { urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
   res.render('login', templateVars)
+  }
 });
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   if (!emailLookUp(email, users)) {
     errorHandler(res, 403, 'User not found', undefined);
-    return
+    return;
   }
+
   const user_id = getUserByEmail(email, users);
   const passwordMatch = bcrypt.compareSync(password, users[user_id].password);
   if (!(users[user_id].password && passwordMatch)) {
     errorHandler(res, 403, 'Incorrect email or password', undefined);
   } else {
-  req.session.user_id = user_id;
-  // console.log(req.session)
-  // const templateVars = { user: users[req.session.user_id] };
-  res.redirect('/urls');
+    req.session.user_id = user_id;
+    res.redirect('/urls');
   }
 });
 
@@ -126,32 +96,38 @@ app.post('/logout', (req, res) => {
 app.get('/register', (req, res) => {
   if (req.session.user_id) {
     res.redirect('/urls');
-    return;
-  }
+  } else {
   const templateVars = { user: users[req.session.user_id] };
   res.render('registration', templateVars)
+  }
 });
 
 app.post('/register', (req, res) => {
-  let randomUserID = generateRandomString(8);
+  const randomUserID = generateRandomString(8);
   const email = req.body.email;
   const password = req.body.password;
   const hashedPassword = bcrypt.hashSync(password, 10);
+
   if (email === "" || password === "") {
-    // res.status(400).send('no e-mail or password entered')
     errorHandler(res, 400, 'no e-mail or password entered', undefined);
-    return
-    // console.log(`users: ${JSON.stringify(users)}`)
-  }
-  if (getUserByEmail(email, users)) {
-    // res.status(400).send('E-mail already exists in database')
+  } else if (getUserByEmail(email, users)) {
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
-    return
   } else {
-  users[randomUserID] = { id: randomUserID, email: req.body.email, password: hashedPassword };
-  req.session.user_id = randomUserID;
-  res.redirect('/urls');
+    users[randomUserID] = { id: randomUserID, email: req.body.email, password: hashedPassword };
+    req.session.user_id = randomUserID;
+    res.redirect('/urls');
   }
+});
+
+app.get('/urls', (req, res) => {
+  const shorteningLink = 'Follow this link to shorten your URL:'
+  if (!req.session.user_id) {
+    errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
+    return;
+  }
+  const userURLs = urlsForUser(req.session.user_id, urlDatabase);
+  const templateVars = { userURLs, shorteningLink, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
+  res.render('urls_index', templateVars)
 });
 
 app.get('/urls/new', (req, res) => {
