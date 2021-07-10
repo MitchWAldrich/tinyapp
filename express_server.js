@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const { errorHandler, getUserByEmail, urlsForUser, emailLookUp, generateRandomString } = require('./helpers');
+const { errorHandler, getUserByEmail, urlsForUser, emailLookUp, generateRandomString, shortUrlLookUp } = require('./helpers');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
@@ -199,13 +199,13 @@ app.post('/urls/:id/delete', (req, res) => {
   }
 });
 
-app.get('/u/:shortURL', (req, res) => {
-  const id = req.params.shortURL;
-  if (!id) {
+app.get('/u/:id', (req, res) => {
+  const id = req.params.id;
+  if (!shortUrlLookUp(id, urlDatabase)) {
     errorHandler(res, 404, 'The website does not exist', undefined);
   } else {
-    const templateVars = { userID: req.params.userID, longURL: urlDatabase[id] };
-    res.redirect(`/urls/${id}`, templateVars);
+    const longURL = urlDatabase[id].longURL;
+    res.redirect(`${longURL}`);
   }
 });
 

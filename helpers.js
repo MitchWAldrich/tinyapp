@@ -26,8 +26,16 @@ const urlsForUser = function(id, database) {
 
 const emailLookUp = function(email, users) {
   for (const user in users) {
-    if (email == users[user].email) {
+    if (email === users[user].email) {
       return email;
+    }
+  }
+}
+
+const shortUrlLookUp = function(shortURL, database) {
+  for (const url in database) {
+    if (shortURL === url) {
+      return shortURL;
     }
   }
 }
@@ -47,5 +55,6 @@ module.exports = {
   getUserByEmail,
   urlsForUser,
   emailLookUp,
+  shortUrlLookUp,
   generateRandomString
 };
