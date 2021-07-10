@@ -32,10 +32,20 @@ const emailLookUp = function(email, users) {
   }
 }
 
+const generateRandomString = function(numOfChars) {
+  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randomShortURL = '';
+  const charactersLength = characters.length;
+  for (let i = 0; i < numOfChars; i++) {
+    randomShortURL += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return randomShortURL;
+};
 
 module.exports = { 
   errorHandler,
   getUserByEmail,
   urlsForUser,
-  emailLookUp
+  emailLookUp,
+  generateRandomString
 };

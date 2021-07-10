@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const { errorHandler, getUserByEmail, urlsForUser, emailLookUp } = require('./helpers');
+const { errorHandler, getUserByEmail, urlsForUser, emailLookUp, generateRandomString } = require('./helpers');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 const salt = bcrypt.genSaltSync(10);
@@ -14,16 +14,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }))
-
-const generateRandomString = function(numOfChars) {
-  const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let randomShortURL = '';
-  const charactersLength = characters.length;
-  for (let i = 0; i < numOfChars; i++) {
-    randomShortURL += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return randomShortURL;
-};
 
 const urlDatabase = {
   'b2xVn2': {userID: 'userRandomID', longURL: 'http://www.lighthouselabs.ca'},
