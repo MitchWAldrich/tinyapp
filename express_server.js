@@ -97,8 +97,7 @@ app.get('/register', (req, res) => {
 
 app.post('/register', (req, res) => {
   const randomUserID = generateRandomString(8);
-  const email = req.body.email;
-  const password = req.body.password;
+  const { email, password } = req.body;
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (email === "" || password === "") {
@@ -161,7 +160,7 @@ app.get('/urls/:id', (req, res) => {
   } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
   } else {
-    const templateVars = { userID: id, longURL, users, user: users[req.session.user_id]};
+    const templateVars = { longURL, users, userID: id, user: users[req.session.user_id]};
     res.render('urls_show', templateVars);
   }
 });
