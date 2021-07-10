@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-const { errorHandler, getUserByEmail, urlsForUser } = require('./helpers');
+const { errorHandler, getUserByEmail, urlsForUser, emailLookUp } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 
@@ -102,21 +102,15 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  // const hashedPassword = bcrypt.hashSync(password, 10);
+  if (!emailLookUp(email, users)) {
+    errorHandler(res, 403, 'User not found', undefined);
+    return
+  }
   const user_id = getUserByEmail(email, users);
-
   const passwordMatch = bcrypt.compareSync(password, users[user_id].password);
-  if (!(users[user_id] && passwordMatch)) {
-    errorHandler(res, 403, 'Incorrect email or password', null);
-    
+  if (!(users[user_id].password && passwordMatch)) {
+    errorHandler(res, 403, 'Incorrect email or password', undefined);
   } else {
-  // if (!emailLookUp(email)) {
-  // }
-  // if (passwordLookUp(email) !== password) {
-  //   errorHandler(res, 403, 'Incorrect password', getUserByEmail(email, users));
-  //   return
-  // }
-  // bcrypt.compareSync('password', hashedPassword);
   req.session.user_id = user_id;
   // console.log(req.session)
   // const templateVars = { user: users[req.session.user_id] };

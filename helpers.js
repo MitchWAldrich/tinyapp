@@ -24,9 +24,18 @@ const urlsForUser = function(id, database) {
   return usersURLS;
 }
 
+const emailLookUp = function(email, users) {
+  for (const user in users) {
+    if (email == users[user].email) {
+      return email;
+    }
+  }
+}
+
 
 module.exports = { 
   errorHandler,
   getUserByEmail,
-  urlsForUser
+  urlsForUser,
+  emailLookUp
 };
