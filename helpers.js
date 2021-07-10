@@ -12,15 +12,21 @@ const getUserByEmail = function(email, users) {
   }
 }
 
-// const noInputError = function(res) {
-//   const templateVars = { errorCode: 400, errorMessage: 'no e-mail or password entered', user: undefined}
-//   res.render('urls_error', templateVars);
-// }
-
+const urlsForUser = function(id, database) {
+  let usersURLS = {};
+  for (const url in database) {
+    // console.log(url);
+    if (database[url].userID === id) {
+      usersURLS[url] = database[url].longURL;
+    }
+  }
+  // console.log(usersURLS)
+  return usersURLS;
+}
 
 
 module.exports = { 
   errorHandler,
-  getUserByEmail
-  // noInputError 
+  getUserByEmail,
+  urlsForUser
 };

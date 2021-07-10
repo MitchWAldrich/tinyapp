@@ -2,8 +2,7 @@ const express = require('express');
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require('body-parser');
-// const cookieParser = require('cookie-parser');
-const { errorHandler, getUserByEmail } = require('./helpers');
+const { errorHandler, getUserByEmail, urlsForUser } = require('./helpers');
 const bcrypt = require('bcryptjs');
 const cookieSession = require('cookie-session');
 
@@ -13,7 +12,6 @@ bcrypt.hashSync("", salt);
 
 
 app.use(bodyParser.urlencoded({extended:true}));
-// app.use(cookieParser());
 app.set('view engine', 'ejs');
 app.use(cookieSession({
   name: 'session',
@@ -48,57 +46,18 @@ const users = {
   },
 }
 
-// const userObjectLookUp = function(email) {
-//   for (const user in users) {
-//     if (email === users[user].email) {
-//       return users[user];
-//     }  
-//   }  
-// }
 
-// const getUserByEmail = function(email, users) {
-//   for (const user in users) {
-//     if (email === users[user].email) {
-//       return user;
+// const urlsForUser = function(id, database) {
+//   let usersURLS = {};
+//   for (const url in urlDatabase) {
+//     // console.log(url);
+//     if (urlDatabase[url].userID === id) {
+//       usersURLS[url] = urlDatabase[url].longURL;
 //     }
 //   }
+//   // console.log(usersURLS)
+//   return usersURLS;
 // }
-
-// const passwordLookUp = function(email) {
-//   for (const user in users) {
-//     if (email === users[user].email) {
-//       return users[user].password;
-//     }
-//   }
-// }
-
-// const emailLookUp = function(email) {
-//   for (const user in users) {
-//     if (email === users[user].email) {
-//       return email;
-//     }
-//   }
-// }
-
-// const checkUserExists = function(user_id) {
-//   for (const user in users) {
-//     if (user === user_id) {
-//       return true;
-//     }
-//   }
-// }
-
-const urlsForUser = function(id) {
-  let usersURLS = {};
-  for (const url in urlDatabase) {
-    // console.log(url);
-    if (urlDatabase[url].userID === id) {
-      usersURLS[url] = urlDatabase[url].longURL;
-    }
-  }
-  // console.log(usersURLS)
-  return usersURLS;
-}
 
 app.get('/', (req, res) => {
   if (!req.session.user_id) {
@@ -125,7 +84,7 @@ app.get('/urls', (req, res) => {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
   }
-  const userURLs = urlsForUser(req.session.user_id);
+  const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   // console.log('users', users)
   
   const templateVars = { userURLs, shorteningLink, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
@@ -143,14 +102,14 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const hashedPassword = bcrypt.hashSync(password, 10);
+  // const hashedPassword = bcrypt.hashSync(password, 10);
   const user_id = getUserByEmail(email, users);
 
   const passwordMatch = bcrypt.compareSync(password, users[user_id].password);
   if (!(users[user_id] && passwordMatch)) {
-    errorHandler(res, 403, 'Incorrect email or password', getUserByEmail(email, users));
-    return
-  }
+    errorHandler(res, 403, 'Incorrect email or password', null);
+    
+  } else {
   // if (!emailLookUp(email)) {
   // }
   // if (passwordLookUp(email) !== password) {
@@ -159,7 +118,10 @@ app.post('/login', (req, res) => {
   // }
   // bcrypt.compareSync('password', hashedPassword);
   req.session.user_id = user_id;
+  // console.log(req.session)
+  // const templateVars = { user: users[req.session.user_id] };
   res.redirect('/urls');
+  }
 });
 
 app.post('/logout', (req, res) => {
@@ -203,7 +165,7 @@ app.get('/urls/new', (req, res) => {
     res.redirect('/login');
     return;
   }
-  console.log(req.cookies);
+  // console.log(req.cookies);
   const templateVars = { user: users[req.session.user_id], };
   res.render('urls_new', templateVars);
 });
@@ -237,7 +199,7 @@ app.get('/urls/:id', (req, res) => {
     return;
   }
   const longURL = urlDatabase[id].longURL;
-  const userURLs = urlsForUser(req.session.user_id);
+  const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const userKeys = Object.keys(userURLs);
   if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
@@ -254,8 +216,12 @@ app.get('/urls/:id', (req, res) => {
 app.post('/urls/:id', (req, res) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
-  const userURLs = urlsForUser(req.session.user_id);
+  const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const userKeys = Object.keys(userURLs);
+  if (!req.session.user_id) {
+    errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
+    return;
+  }
   if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
     return;
@@ -265,13 +231,17 @@ app.post('/urls/:id', (req, res) => {
     return;
   }
   urlDatabase[id] = { userID: req.session.user_id, longURL: longURL };
-  res.redirect(`/urls/${id}`);
+  res.redirect(`/urls/`);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
   const id = req.params.id;
-  const userURLs = urlsForUser(req.session.user_id);
+  const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const userKeys = Object.keys(userURLs);
+  if (!req.session.user_id) {
+    errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
+    return;
+  }
   if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to delete this URL.', req.session.user_id);
     return;
@@ -285,13 +255,14 @@ app.post('/urls/:id/delete', (req, res) => {
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  const id = req.params.userID;
+  const id = req.params.shortURL;
+  console.log(id)
   if (!id) {
     errorHandler(res, 404, 'The website does not exist', undefined);
     return
   }
   const templateVars = { userID: req.params.userID, longURL: urlDatabase[id] };
-  res.redirect(templateVars.longURL);
+  res.redirect(`/urls/${id}`);
   console.log(templateVars.longURL)
 });
 
