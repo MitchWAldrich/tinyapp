@@ -167,7 +167,7 @@ app.get('/urls/:id', (req, res) => {
   }
 });
 
-app.post('/urls/:id', (req, res) => {
+app.put('/urls/:id', (req, res, next) => {
   const id = req.params.id;
   const longURL = req.body.longURL;
   const userURLs = urlsForUser(req.session.user_id, urlDatabase);
