@@ -123,64 +123,54 @@ app.get('/urls', (req, res) => {
   const shorteningLink = 'Follow this link to shorten your URL:'
   if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
-    return;
-  }
+  } else {
   const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const templateVars = { userURLs, shorteningLink, urlDatabase: urlDatabase, users, user: users[req.session.user_id] };
   res.render('urls_index', templateVars)
-});
-
-app.get('/urls/new', (req, res) => {
-  if (!req.session.user_id) {
-    res.redirect('/login');
-    return;
   }
-  // console.log(req.cookies);
-  const templateVars = { user: users[req.session.user_id], };
-  res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
   if (!req.session.user_id) {
     errorHandler(res, 403, 'Access forbidden. You are not logged in.', undefined);
     res.redirect('/urls_error');
-    return;
-  }
-  // console.log(req.params);  // Log the POST request body to the console
-  let shortURL = generateRandomString(6);
+  } else {
+  const shortURL = generateRandomString(6);
   urlDatabase[shortURL] = {userID: req.session.user_id, longURL: req.body.longURL};
-  console.log('test', urlDatabase[shortURL])
-  console.log('test2', req.body.longURL)
-  console.log('database', urlDatabase)
   res.redirect(`/urls/${shortURL}`);
+  }
+});
+
+app.get('/urls/new', (req, res) => {
+  if (!req.session.user_id) {
+    res.redirect('/login');
+  } else {
+  const templateVars = { user: users[req.session.user_id], };
+  res.render('urls_new', templateVars);
+  }
 });
 
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  // console.log(req.params)
   const shortURL = urlDatabase[id];
-  console.log('udb',urlDatabase[id])
   if (!shortURL) {
     errorHandler(res, 404, 'The website does not exist', req.session.user_id);
-    return
-  }
-  if (!req.session.user_id) {
+  } else if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
   }
+
   const longURL = urlDatabase[id].longURL;
   const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const userKeys = Object.keys(userURLs);
   if (userKeys.length === 0) {
+    errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);  
+  } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
-    return;
-  }
-  if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
-    errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
-    return;
-  }
+  } else {
   const templateVars = { userID: id, longURL: longURL, users, user: users[req.session.user_id]};
   res.render('urls_show', templateVars);
+  }
 });
 
 app.post('/urls/:id', (req, res) => {
@@ -190,18 +180,14 @@ app.post('/urls/:id', (req, res) => {
   const userKeys = Object.keys(userURLs);
   if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
-    return;
-  }
-  if (userKeys.length === 0) {
+  } else if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
-    return;
-  }
-  if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
+  } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
     errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
-    return;
-  }
+  } else {
   urlDatabase[id] = { userID: req.session.user_id, longURL: longURL };
   res.redirect(`/urls/`);
+  }
 });
 
 app.post('/urls/:id/delete', (req, res) => {
@@ -210,32 +196,25 @@ app.post('/urls/:id/delete', (req, res) => {
   const userKeys = Object.keys(userURLs);
   if (!req.session.user_id) {
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
-    return;
-  }
-  if (userKeys.length === 0) {
+  } else if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to delete this URL.', req.session.user_id);
-    return;
-  }
-  if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
+  } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) {
     errorHandler(res, 403, 'You do not have permission to delete this URL.', req.session.user_id);
-    return;
-  }
+  } else {
   delete urlDatabase[id];
   res.redirect(`/urls/`);
+  }
 });
 
 app.get('/u/:shortURL', (req, res) => {
   const id = req.params.shortURL;
-  console.log(id)
   if (!id) {
     errorHandler(res, 404, 'The website does not exist', undefined);
-    return
-  }
+  } else {
   const templateVars = { userID: req.params.userID, longURL: urlDatabase[id] };
   res.redirect(`/urls/${id}`);
-  console.log(templateVars.longURL)
+  }
 });
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
