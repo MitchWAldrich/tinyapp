@@ -1,8 +1,8 @@
 // Error handler that renders a page consistant with the site's layout and delivers a specific error message to the user
 const errorHandler = function(res, errorCode, errorMessage, user) {
-  const templateVars = { errorCode, errorMessage, user }
+  const templateVars = { errorCode, errorMessage, user };
   res.render('urls_error', templateVars);
-}
+};
 
 // Returns the user using the e-mail stored in the users database
 const getUserByEmail = function(email, users) {
@@ -11,7 +11,7 @@ const getUserByEmail = function(email, users) {
       return user;
     }
   }
-}
+};
 
 // Returns the URLs saved to a user's page
 const urlsForUser = function(id, database) {
@@ -22,7 +22,7 @@ const urlsForUser = function(id, database) {
     }
   }
   return usersURLS;
-}
+};
 
 // Returns and confirms the proper e-mail assosciated with a user's account
 const emailLookUp = function(email, users) {
@@ -31,7 +31,7 @@ const emailLookUp = function(email, users) {
       return email;
     }
   }
-}
+};
 
 // Returns a shortURL listed in the database
 const shortUrlLookUp = function(shortURL, database) {
@@ -40,7 +40,7 @@ const shortUrlLookUp = function(shortURL, database) {
       return shortURL;
     }
   }
-}
+};
 
 // Generates a random string of upper and lower case letters as well as numbers to create a unique shortURL
 const generateRandomString = function(numOfChars) {
@@ -53,7 +53,7 @@ const generateRandomString = function(numOfChars) {
   return randomShortURL;
 };
 
-module.exports = { 
+module.exports = {
   errorHandler,
   getUserByEmail,
   urlsForUser,

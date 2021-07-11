@@ -66,7 +66,7 @@ app.get('/login', (req, res) => {
   }
 });
 
-// POST Login route 
+// POST Login route
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   if (!emailLookUp(email, users)) { // Tells user if their email is not found
@@ -75,7 +75,7 @@ app.post('/login', (req, res) => {
   }
   
   // Compares password to encrypted password for secure sign in
-  const user_id = getUserByEmail(email, users); 
+  const user_id = getUserByEmail(email, users);
   const passwordMatch = bcrypt.compareSync(password, users[user_id].password);
   if (!(users[user_id].password && passwordMatch)) { // redirects if password does not match database
     errorHandler(res, 403, 'Incorrect email or password', undefined);
@@ -97,7 +97,7 @@ app.get('/register', (req, res) => {
   if (req.session.user_id) { // if user is signed in, redirects to urls page
     res.redirect('/urls');
   } else { // else user can register
-    const templateVars = { user: users[req.session.user_id] }; 
+    const templateVars = { user: users[req.session.user_id] };
     res.render('registration', templateVars);
   }
 });
@@ -110,7 +110,7 @@ app.post('/register', (req, res) => {
   //Generating the Hashed Password from Plain Text Password
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  //Checking for Validations 
+  //Checking for Validations
   //1. If the email or password is empty
   if (getUserByEmail(email, users)) { //If the email is already taken
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
@@ -140,8 +140,8 @@ app.post('/urls', (req, res) => {
   if (!req.session.user_id) { // users can only view URLs saved to their account
     errorHandler(res, 403, 'Access forbidden. You are not logged in.', undefined);
     res.redirect('/urls_error');
-  } else { 
-    const shortURL = generateRandomString(6); 
+  } else {
+    const shortURL = generateRandomString(6);
     urlDatabase[shortURL] = {userID: req.session.user_id, longURL: req.body.longURL};
     res.redirect(`/urls/${shortURL}`);
   }
@@ -172,7 +172,7 @@ app.get('/urls/:id', (req, res) => {
   const longURL = urlDatabase[id].longURL;
   const userURLs = urlsForUser(req.session.user_id, urlDatabase);
   const userKeys = Object.keys(userURLs);
-  if (userKeys.length === 0) { 
+  if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
   } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) { //error and security handling, allows only the user to access their registered shortURLs
     errorHandler(res, 403, 'You do not have permission to access this URL.', req.session.user_id);
@@ -190,7 +190,7 @@ app.put('/urls/:id', (req, res, next) => {
   const userKeys = Object.keys(userURLs);
   if (!req.session.user_id) { //redirects if user is not logged in
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
-  } else if (userKeys.length === 0) { 
+  } else if (userKeys.length === 0) {
     errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
   } else if (!(userKeys.includes(id) || userKeys.includes(id) + '?')) { // user can only edit URLs registered to their account
     errorHandler(res, 403, 'You do not have permission to edit this URL.', req.session.user_id);
