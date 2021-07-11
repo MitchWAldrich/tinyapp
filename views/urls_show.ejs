@@ -18,7 +18,7 @@
     <div class="card-footer text-muted"></div>
   </div>
   <div class="card text-center" style="background-color:lightgrey">
-    <h3 class="card-header">EDIT:</h3>
+    <h3 class="card-header">EDIT: <%= longURL %></h3>
     <form class="form-inline" action="/urls/<%= userID %>/?_method=PUT" method="POST">
       <div class="form-group mb-2" style="margin:auto">
         <label for="longURL">New URL:</label>

@@ -80,7 +80,7 @@ app.post('/login', (req, res) => {
   if (!(users[user_id].password && passwordMatch)) { // redirects if password does not match database
     errorHandler(res, 403, 'Incorrect email or password', undefined);
   } else { //else user signed in and sent to URLs page
-    req.session.user_id = user_id;
+    req.session.user_id = user_id; // session id created
     res.redirect('/urls');
   }
 });
@@ -112,10 +112,10 @@ app.post('/register', (req, res) => {
 
   //Checking for Validations 
   //1. If the email or password is empty
-  if (email === '' || password === '') {
-    errorHandler(res, 400, 'no e-mail or password entered', undefined);
-  } else if (getUserByEmail(email, users)) { //If the email is already taken
+  if (getUserByEmail(email, users)) { //If the email is already taken
     errorHandler(res, 400, 'E-mail already exists in database', undefined);
+  } else if (email === '' || password === '') {
+    errorHandler(res, 400, 'no e-mail or password entered', undefined);
   } else { //else everything is fine. User can be registered
     users[randomUserID] = { id: randomUserID, email: req.body.email, password: hashedPassword };
     req.session.user_id = randomUserID;
@@ -160,9 +160,10 @@ app.get('/urls/new', (req, res) => {
 //GET route for user's individual shortURLs
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
+  console.log(id);
   const shortURL = urlDatabase[id];
   if (!shortURL) { // informs user if shortURL does not exist
-    errorHandler(res, 404, 'The website does not exist', req.session.user_id);
+    errorHandler(res, 404, 'You do not have permission to access this page or the page does not exist.', req.session.user_id);
   } else if (!req.session.user_id) { // if user is not logged in, redirects to Login page
     errorHandler(res, 403, 'You are not logged in. Please register or log in to your account.', undefined);
     return;
