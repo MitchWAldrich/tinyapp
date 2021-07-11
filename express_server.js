@@ -160,7 +160,6 @@ app.get('/urls/new', (req, res) => {
 //GET route for user's individual shortURLs
 app.get('/urls/:id', (req, res) => {
   const id = req.params.id;
-  console.log(id);
   const shortURL = urlDatabase[id];
   if (!shortURL) { // informs user if shortURL does not exist
     errorHandler(res, 404, 'You do not have permission to access this page or the page does not exist.', req.session.user_id);
